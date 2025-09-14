@@ -1,0 +1,74 @@
+# pip install gTTS
+import os
+from gtts import gTTS
+import zipfile
+
+# Folder
+folder_name = "alphabet_audio"
+os.makedirs(folder_name, exist_ok=True)
+
+# Alphabet Data
+alphabet_data = {
+    "A": ("એ, અ, આ, ઓ", "Apple"),
+    "B": ("બ", "Bat"),
+    "C": ("ક", "Cat"),
+    "D": ("ડ", "Dog"),
+    "E": ("ઈ, એ", "Egg"),
+    "F": ("ફ", "Fan"),
+    "G": ("ગ", "God"),
+    "H": ("હ", "Hen"),
+    "I": ("ઇ, આઈ", "Ice"),
+    "J": ("જ", "Jug"),
+    "K": ("ક", "King"),
+    "L": ("લ", "Lion"),
+    "M": ("મ", "Mango"),
+    "N": ("ન", "Nest"),
+    "O": ("ઓ", "Owl"),
+    "P": ("પ", "Parrot"),
+    "Q": ("ક્યુ", "Queen"),
+    "R": ("ર", "Rat"),
+    "S": ("સ", "Sun"),
+    "T": ("ટ, તી", "Tent"),
+    "U": ("યુ, અ", "Up"),
+    "V": ("વ", "Van"),
+    "W": ("વ", "Web"),
+    "X": ("ક્ષ", "Box"),
+    "Y": ("વ", "Yak"),
+    "Z": ("ઝ", "Zoo"),
+}
+
+# Generate MP3
+for letter, (guj, ex) in alphabet_data.items():
+    gTTS(letter, lang='en').save(os.path.join(folder_name, f"{letter}.mp3"))
+    gTTS(guj, lang='gu').save(os.path.join(folder_name, f"{letter}_guj.mp3"))
+    gTTS(ex, lang='en').save(os.path.join(folder_name, f"{letter}_ex.mp3"))
+
+# HTML
+html_content = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Alphabet Audio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;text-align:center;} .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;} .card{padding:10px;background:#fff;border-radius:10px;box-shadow:1px 1px 4px #aaa;cursor:pointer;} .letter{font-size:24px;font-weight:bold;} .guj{font-size:14px;color:#555;} .example{font-size:14px;color:green;font-style:italic;}</style>
+</head><body><h2>Alphabet Audio</h2><div class="grid">
+"""
+for letter, (guj, ex) in alphabet_data.items():
+    html_content += f'<div class="card" onclick="playSet(\'{letter}\')"><span class="letter">{letter}</span><span class="guj">{guj}</span><span class="example">{ex}</span></div>'
+html_content += """</div>
+<script>
+function playSet(letter){
+let files=[letter+".mp3",letter+"_guj.mp3",letter+"_ex.mp3"],index=0;
+function playNext(){if(index<files.length){let a=new Audio(files[index]);a.onended=()=>{index++;playNext()};a.play();}}
+playNext();
+}
+</script>
+</body></html>
+"""
+
+with open(os.path.join(folder_name, "alphabet_audio_mobile.html"), "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+# ZIP
+zip_name = "alphabet_audio_package.zip"
+with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zipf:
+    for file in sorted(os.listdir(folder_name)):
+        zipf.write(os.path.join(folder_name, file), arcname=file)
+
+print("✅ ZIP file created: alphabet_audio_package.zip")
